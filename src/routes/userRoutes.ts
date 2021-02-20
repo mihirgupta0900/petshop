@@ -90,7 +90,7 @@ router.patch("/:id", async (req, res) => {
           }
           petsList.push(pet)
         })
-        user.pets = petsList
+        user.pets = Promise.resolve(petsList)
 
         await userRepo.save(user)
       }

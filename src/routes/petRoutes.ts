@@ -79,7 +79,10 @@ router.patch("/:id", async (req, res) => {
     if (pet) {
       if (name) pet.name = name
       if (age) pet.age = age
-      if (user) pet.owner = await userRepo.findOne({ id: user.id })
+      if (user) {
+        const dbUser = await userRepo.findOne({ id: user.id })
+        if (dbUser) pet.owner = Promise.resolve(dbUser)
+      }
     }
     res.status(200).json({ message: "Pet updated", pet })
   } catch (error) {

@@ -23,5 +23,5 @@ export default class Pet {
 
   @ManyToOne(() => User, (user) => user.pet)
   @JoinColumn()
-  owner?: User
+  owner?: Promise<User>
 }

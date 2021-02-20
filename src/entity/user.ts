@@ -10,5 +10,5 @@ export default class User {
   name: string
 
   @OneToMany(() => Pet, (pet) => pet.owner)
-  pets: Pet[]
+  pets: Promise<Pet[]>
 }
