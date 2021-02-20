@@ -101,6 +101,22 @@ router.patch("/:id", async (req, res) => {
   }
 })
 
+// Get all pets of a user
+router.get("/:userId/pets", (req, res) => {
+  getRepository(User)
+    .findOne({ id: parseInt(req.params.id) })
+    .then(async (user) => {
+      if (user) {
+        const pets = await user.pets
+        res.status(200).json({ userName: user.name, pets })
+      }
+      res.status(500).json({ message: "Could not find a user" })
+    })
+    .catch((e) => {
+      res.status(500).json({ message: "Error in quering the DB", error: e })
+    })
+})
+
 interface UserUpdateBody {
   name?: string
   pets?: {
