@@ -9,6 +9,6 @@ export default class User {
   @Column()
   name: string
 
-  @OneToMany(() => Pet, (pet) => pet.owner)
+  @OneToMany(() => Pet, (pet) => pet.owner, { cascade: true })
   pets: Promise<Pet[]>
 }

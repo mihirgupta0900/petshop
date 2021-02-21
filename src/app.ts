@@ -8,6 +8,6 @@ app.use(express.json())
 
 app.get("/", (_, res) => res.send("hey"))
 app.use("/pets", petRoutes)
-app.use("/user", ownerRoutes)
+app.use("/users", ownerRoutes)
 
 export default app

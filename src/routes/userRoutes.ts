@@ -20,8 +20,8 @@ router.get("/:id", (req, res) => {
   const id = req.params.id
   getRepository(User)
     .findOne({ id: parseInt(id) })
-    .then((user) => {
-      res.status(200).json(user)
+    .then(async (user) => {
+      res.status(200).json({ ...user, pets: await user?.pets })
     })
     .catch((err) => {
       res.status(500).json({ error: err, message: "Error in quering the DB" })
@@ -79,20 +79,15 @@ router.patch("/:id", async (req, res) => {
     if (user) {
       if (name) user.name = name
       if (pets && pets.length) {
-        let petsList: Pet[] = []
-        ;(
+        let petsList = (
           await Promise.all(
             pets.map(async ({ id }) => await petRepo.findOne({ id }))
           )
-        ).forEach((pet) => {
-          if (pet === undefined) {
-            return
-          }
-          petsList.push(pet)
-        })
-        user.pets = Promise.resolve(petsList)
+        ).filter(Boolean)
+        console.log(petsList)
+        // ;(await user.pets).push(...petsList)
 
-        await userRepo.save(user)
+        // await userRepo.save(user)
       }
     }
     res.status(200).json({ message: "User updated", user })
@@ -103,18 +98,25 @@ router.patch("/:id", async (req, res) => {
 
 // Get all pets of a user
 router.get("/:userId/pets", (req, res) => {
-  getRepository(User)
-    .findOne({ id: parseInt(req.params.id) })
-    .then(async (user) => {
-      if (user) {
-        const pets = await user.pets
-        res.status(200).json({ userName: user.name, pets })
-      }
-      res.status(500).json({ message: "Could not find a user" })
-    })
-    .catch((e) => {
-      res.status(500).json({ message: "Error in quering the DB", error: e })
-    })
+  const strId = req.params.userId
+  const id = !isNaN(parseInt(strId)) && parseInt(strId)
+  if (!id)
+    res.status(400).json({ message: "Please have an integer as the user id" })
+  else {
+    getRepository(User)
+      .findOne({ id })
+      .then(async (user) => {
+        if (user) {
+          const pets = await user.pets
+          res.status(200).json(pets)
+        } else {
+          res.status(400).json({ message: "Could not find a user" })
+        }
+      })
+      .catch((e) => {
+        res.status(500).json({ message: "Error in quering the DB", error: e })
+      })
+  }
 })
 
 interface UserUpdateBody {

@@ -7,7 +7,7 @@ const router = Router()
 
 router.get("/", (_, res) => {
   getRepository(Pet)
-    .find()
+    .find({ relations: ["owner"] })
     .then((pets) => {
       res.status(200).json(pets)
     })
@@ -19,7 +19,7 @@ router.get("/", (_, res) => {
 router.get("/:id", (req, res) => {
   const id = req.params.id
   getRepository(Pet)
-    .findOne({ id: parseInt(id) })
+    .findOne({ where: { id: parseInt(id) }, relations: ["owner"] })
     .then((pet) => {
       res.status(200).json(pet)
     })
@@ -81,7 +81,10 @@ router.patch("/:id", async (req, res) => {
       if (age) pet.age = age
       if (user) {
         const dbUser = await userRepo.findOne({ id: user.id })
-        if (dbUser) pet.owner = Promise.resolve(dbUser)
+        if (dbUser) {
+          pet.owner = dbUser
+          await petRepo.save(pet)
+        }
       }
     }
     res.status(200).json({ message: "Pet updated", pet })
